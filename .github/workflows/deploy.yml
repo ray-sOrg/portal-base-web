@@ -16,14 +16,14 @@ jobs:
       - name: Login to Alibaba Cloud Container Registry
         uses: docker/login-action@v2
         with:
-          registry: registry-vpc.cn-chengdu.aliyuncs.com
+          registry: registry.cn-chengdu.aliyuncs.com
           username: ${{ secrets.ALICLOUD_USERNAME }}
           password: ${{ secrets.ALICLOUD_PASSWORD }}
 
       - name: Build and push Docker image
         run: |
           IMAGE_TAG=${{ github.sha }}
-          IMAGE=registry-vpc.cn-chengdu.aliyuncs.com/ray321/ray
+          IMAGE=registry.cn-chengdu.aliyuncs.com/ray321/ray
 
           docker build -t $IMAGE:latest -t $IMAGE:$IMAGE_TAG .
           docker push $IMAGE:latest
@@ -40,6 +40,6 @@ jobs:
         run: |
           echo "$KUBECONFIG_B64" | base64 --decode > $HOME/.kube/config
           IMAGE_TAG=${{ github.sha }}
-          IMAGE=registry-vpc.cn-chengdu.aliyuncs.com/ray321/ray
+          IMAGE=registry.cn-chengdu.aliyuncs.com/ray321/ray
           kubectl set image deployment/portal-base-web-deployment portal-base-web=$IMAGE:$IMAGE_TAG
           kubectl rollout status deployment/portal-base-web-deployment
