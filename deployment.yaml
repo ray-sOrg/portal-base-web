@@ -1,0 +1,61 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-base-web-deployment
+  labels:
+    app: portal-base-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: portal-base-web
+  template:
+    metadata:
+      labels:
+        app: portal-base-web
+    spec:
+      containers:
+        - name: portal-base-web
+          image: registry-vpc.cn-chengdu.aliyuncs.com/ray321/ray:latest
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portal-base-web-service
+spec:
+  selector:
+    app: portal-base-web
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: portal-base-web-ingress
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    # 这里如果你需要强制重定向http到https，可以额外配置
+spec:
+  tls:
+    - hosts:
+        - ray321.cn
+      # secretName 是存放 TLS 证书的 Secret 名称，Traefik 会用它做 https
+      secretName: portal-base-web-tls
+  rules:
+    - host: ray321.cn
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portal-base-web-service
+                port:
+                  number: 80
