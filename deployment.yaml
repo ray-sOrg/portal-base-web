@@ -6,7 +6,7 @@ metadata:
   labels:
     app: portal-base-web
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: portal-base-web
@@ -15,6 +15,8 @@ spec:
       labels:
         app: portal-base-web
     spec:
+      imagePullSecrets:
+        - name: regcred
       containers:
         - name: portal-base-web
           image: registry-vpc.cn-chengdu.aliyuncs.com/ray321/ray:latest
