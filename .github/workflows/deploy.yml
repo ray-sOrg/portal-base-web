@@ -7,7 +7,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: production # 👈 关键点，指定使用哪个环境（绑定 secrets）
+    environment: production
 
     steps:
       - name: Checkout code
@@ -38,10 +38,16 @@ jobs:
         env:
           KUBECONFIG_B64: ${{ secrets.KUBECONFIG }}
         run: |
-          mkdir -p $HOME/.kube  # ✅ 先创建目录
+          set -e  # 遇到错误立即退出
+          mkdir -p $HOME/.kube
           echo "$KUBECONFIG_B64" | base64 --decode > $HOME/.kube/config
           export KUBECONFIG=$HOME/.kube/config
 
+          echo "🧪 校验 kubeconfig 是否有效..."
+          kubectl config view
+          kubectl cluster-info || { echo "❌ kubeconfig 无效或无法连接集群"; exit 1; }
+
+          echo "🚀 开始部署..."
           IMAGE_TAG=${{ github.sha }}
           IMAGE=registry.cn-chengdu.aliyuncs.com/ray321/ray
 
