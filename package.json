@@ -1,6 +1,6 @@
 {
   "name": "portal-base-web",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "private": true,
   "scripts": {
     "prepare": "husky install",
@@ -11,7 +11,9 @@
     "version:patch": "yarn version --patch --no-git-tag-version"
   },
   "dependencies": {
+    "@prisma/client": "6.9.0",
     "next": "15.3.3",
+    "prisma": "^6.9.0",
     "qiankun": "^2.10.16",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

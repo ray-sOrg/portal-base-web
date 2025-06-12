@@ -1,3 +1,5 @@
+import "@/db";
+
 export default function Home() {
-  return <div></div>;
+  return <div>首页</div>;
 }
