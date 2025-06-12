@@ -9,26 +9,14 @@ export const Header = () => {
             <Link href="/">
               <span className="inline-block mr-6 ml-6 w-0.25 h-9 bg-white opacity-20 transform rotate-30 align-bottom"></span>
               <span className="text-4xl font-bold">Ghost</span>
-              <span className="text-xl">&nbsp;.Stockade</span>
+              <span className="text-xl">&nbsp;.Stronghold</span>
             </Link>
           </div>
 
           <div className="ml-12">
             <ul className="gap-6 flex text-neutral-400 text-xl">
               <li>
-                <Link href="/nav1" className="hover:text-white">
-                  nav1
-                </Link>
-              </li>
-              <li>
-                <Link href="/nav2" className="hover:text-white">
-                  nav2
-                </Link>
-              </li>
-              <li>
-                <Link href="/nav3" className="hover:text-white">
-                  nav3
-                </Link>
+                <Link href="/nav1">nav1</Link>
               </li>
             </ul>
           </div>

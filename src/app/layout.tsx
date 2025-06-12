@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Stockade Ghost",
+  title: "Stronghold Ghost",
   description: "寨子鬼",
 };
 

@@ -1,6 +1,6 @@
 {
   "name": "portal-base-web",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": true,
   "scripts": {
     "prepare": "husky install",
@@ -25,6 +25,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "husky": "^8.0.0",
+    "server-only": "^0.0.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
