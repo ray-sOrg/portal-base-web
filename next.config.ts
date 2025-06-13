@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
       fullUrl: true,
     },
   },
+  eslint: {
+    dirs: ["src"],
+  },
   /* config options here */
 };
 
