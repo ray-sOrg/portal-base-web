@@ -1,18 +1,18 @@
 # Install dependencies only when needed
-FROM node:lts-alpine AS deps
+FROM registry.cn-hangzhou.aliyuncs.com/nodejs/node:lts-alpine AS deps
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 # Build the project
-FROM node:lts-alpine AS builder
+FROM registry.cn-hangzhou.aliyuncs.com/nodejs/node:lts-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN yarn build
 
 # Production image
-FROM node:lts-alpine AS runner
+FROM registry.cn-hangzhou.aliyuncs.com/nodejs/node:lts-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
