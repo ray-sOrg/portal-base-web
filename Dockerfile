@@ -1,18 +1,18 @@
 # Install dependencies only when needed
-FROM registry-vpc.cn-chengdu.aliyuncs.com/ray321/node:lts-alpine AS deps
+FROM registry.cn-chengdu.aliyuncs.com/ray321/node:lts-alpine AS deps
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 # Build the project
-FROM registry-vpc.cn-chengdu.aliyuncs.com/ray321/node:lts-alpine AS builder
+FROM registry.cn-chengdu.aliyuncs.com/ray321/node:lts-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN yarn build
 
 # Production image
-FROM registry-vpc.cn-chengdu.aliyuncs.com/ray321/node:lts-alpine AS runner
+FROM registry.cn-chengdu.aliyuncs.com/ray321/node:lts-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
