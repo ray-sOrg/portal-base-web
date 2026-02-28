@@ -24,6 +24,7 @@ spec:
       containers:
         - name: portal-base-web
           image: __IMAGE_NAME__:__IMAGE_TAG__ # 将被CI/CD替换
+          imagePullPolicy: Always
           ports:
             - containerPort: 3000
           readinessProbe:
