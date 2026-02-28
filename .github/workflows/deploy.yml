@@ -1,79 +1,73 @@
-name: Deploy to production
+name: 🛠️ Build Docker Image
 
+# ========================================
+# 触发条件：
+# - main 分支推送 → latest 标签
+# - develop 分支推送 → develop 标签  
+# - tag 推送 (v*) → 对应版本标签
+# ========================================
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
+    tags: ['v*']
+
+env:
+  PROJECT_NAME: pwa-home
+  TCR_REGISTRY: ccr.ccs.tencentyun.com
+  TCR_NAMESPACE: ray321
 
 jobs:
-  build-and-deploy:
+  build:
+    name: 🛠️ Build & Push Docker Image
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Login to Alibaba Cloud Container Registry
-        uses: docker/login-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Tencent TCR
+        uses: docker/login-action@v3
         with:
-          registry: registry.cn-chengdu.aliyuncs.com
-          username: ${{ secrets.ALICLOUD_USERNAME }}
-          password: ${{ secrets.ALICLOUD_PASSWORD }}
+          registry: ${{ env.TCR_REGISTRY }}
+          username: ${{ secrets.TCR_USERNAME }}
+          password: ${{ secrets.TCR_PASSWORD }}
 
-      - name: Build and push Docker image
+      # 根据分支/tag 生成镜像标签
+      - name: Generate image tag
+        id: meta
         run: |
-          # 生成唯一镜像标签 (Git短提交哈希 + 日期)
-          IMAGE_TAG="$(date +%Y%m%d)-$(git rev-parse --short HEAD)"
-          PUBLIC_IMAGE=registry.cn-chengdu.aliyuncs.com/ray321/ray
-          VPC_IMAGE=registry-vpc.cn-chengdu.aliyuncs.com/ray321/ray
+          IMAGE_NAME=${{ env.TCR_REGISTRY }}/${{ env.TCR_NAMESPACE }}/${{ env.PROJECT_NAME }}
+          
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            IMAGE_TAG=${GITHUB_REF#refs/tags/v}
+          elif [[ "$GITHUB_REF" == refs/heads/main ]]; then
+            IMAGE_TAG=latest
+          elif [[ "$GITHUB_REF" == refs/heads/develop ]]; then
+            IMAGE_TAG=develop
+          else
+            IMAGE_TAG=${GITHUB_REF#refs/heads/}
+          fi
+          
+          echo "image=$IMAGE_NAME" >> $GITHUB_OUTPUT
+          echo "tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "🏷️ 镜像: $IMAGE_NAME:$IMAGE_TAG"
 
-          echo "🛠 构建镜像标签: $IMAGE_TAG"
-
-          # 构建并标记镜像 (同时标记公网)
-          docker build -t $PUBLIC_IMAGE:$IMAGE_TAG .
-
-          # 推送镜像到公网仓库
-          docker push $PUBLIC_IMAGE:$IMAGE_TAG
-
-          # 保存标签供后续步骤使用
-          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-          echo "VPC_IMAGE=$VPC_IMAGE" >> $GITHUB_ENV
-
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
+      - name: Build & Push Docker Image
+        uses: docker/build-push-action@v5
         with:
-          version: "latest"
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
 
-      - name: Configure cluster access
-        env:
-          KUBECONFIG_B64: ${{ secrets.KUBECONFIG }}
+      - name: Summary
         run: |
-          mkdir -p $HOME/.kube
-          echo "$KUBECONFIG_B64" | base64 --decode > $HOME/.kube/config
-          export KUBECONFIG=$HOME/.kube/config
-
-          echo "🧪 验证集群连接..."
-          kubectl cluster-info || { echo "❌ 集群连接失败"; exit 1; }
-
-      - name: Deploy to Kubernetes
-        run: |
-          echo "::add-mask::$VPC_IMAGE"  # 隐藏内网地址日志
-          echo "🚀 正在部署版本: $IMAGE_TAG"
-
-          # 替换部署文件中的占位符
-          sed -i "s|__IMAGE_TAG__|$IMAGE_TAG|g" deployment.yaml
-          sed -i "s|__IMAGE_NAME__|$VPC_IMAGE|g" deployment.yaml
-
-          # 声明式应用配置
-          kubectl apply -f deployment.yaml
-
-          # 等待滚动更新完成
-          kubectl rollout status deployment/portal-base-web-deployment --timeout=180s || {
-            echo "❌ 部署失败，查看 Pod 状态："
-            kubectl get pods
-            echo "❌ 新 Pod 日志如下："
-            kubectl logs -l app=portal-base-web --tail=50
-            exit 1
-          }
-
-          echo "✅ 部署完成"
+          echo "✅ 镜像构建完成"
+          echo "📦 ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}"
+          echo ""
+          echo "在 Kuboard 中手动更新镜像版本即可部署"
