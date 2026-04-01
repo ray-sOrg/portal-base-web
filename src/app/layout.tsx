@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Header } from "@/components/header";
 import { ICP } from "@/components/icp";
+import VersionInfo from "@/components/VersionInfo";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,6 +33,7 @@ export default function RootLayout({
         <Header />
         {children}
         <ICP />
+        <VersionInfo />
       </body>
     </html>
   );
