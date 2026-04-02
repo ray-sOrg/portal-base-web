@@ -12,7 +12,7 @@ on:
     tags: ['v*']
 
 env:
-  PROJECT_NAME: pwa-home
+  PROJECT_NAME: portal-base-web
   TCR_REGISTRY: ccr.ccs.tencentyun.com
   TCR_NAMESPACE: ray321
 
