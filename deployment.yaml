@@ -20,7 +20,7 @@ spec:
         app: portal-base-web
     spec:
       imagePullSecrets:
-        - name: regcred
+        - name: tencent-tcr-secret
       containers:
         - name: portal-base-web
           image: __IMAGE_NAME__:__IMAGE_TAG__ # 将被CI/CD替换
